@@ -2,29 +2,45 @@
 https://github.com/wangyu-/udp2raw-tunnel
 ## 协议格式
 ```
-+----------+----------+------------+---------------+------+-----------+---------------+
-| conv_num |   my_id  | oppsite_id |     n_seq     | type | my_roller |      DATA     | 
-+----------+----------+------------+---------------+------+-----------+---------------+
-|     4    |     4    |      4     |       8       |   1  |      1    |   variable    | 
-+----------+----------+------------+---------------+------+-----------+---------------+
+except handshakes and 3 packets after handshakes ? 
+FIN unknown yet
++-----------+------------+---------------+------+-----------+---------------+
+|   my_id   | oppsite_id |     n_seq     | type | my_roller |      DATA     | 
++-----------+------------+---------------+------+-----------+---------------+
+|     4     |     4      |       8       |   1  |     1     |   variable    | 
++-----------+------------+---------------+------+-----------+---------------+
 
 ```
 ### 说明
-- conv_num：16-bytes cryptographically secure random number, nonce changes for every packet
-- my_id：checksum of data using the IEEE polynomial
-   NONCE + CRC = overall crypto header size
-- oppsite_id：random num for each flow
-- n_seq：
-- type：fragment count
-- my_roller：window size
+- conv_num：?
+- my_id：       my unique id in a conversation
+- oppsite_id：  opposite unique id in a conversation
+- n_seq：       seq_id
+- type：
+   * 68(h):  heart beat
+   * 64(d):  data
+ 
+- my_roller：   increase on a successful recv, only for record recv times?
 
 - DATA
-    * VER：1
-    * CMD：
-        * cmdSYN：stream open
-        * cmdFIN：stream close, a.k.a EOF mark
-        * cmdPSH：data push
-        * cmdNOP：no operation
-    * LEN：data length
-    * SID：client start from 1, sever start from 0, for each flow step by step 2
     * DATA：udp data
+    
+    
+   handshakes and 3 packets after handshakes dont like this
+   (heartbeat)
+   f6f359bb 53327d4e 0d9be642a1ce909d 68 08
+   53327d4e f6f359bb 0559318fc8ae3f67 68 09
+   ...
+   53327d4e f6f359bb 0559318fc8ae3f62 68 04 
+   f6f359bb 53327d4e 0d9be642a1ce9099 68 04
+   53327d4e f6f359bb 0559318fc8ae3f63 68 05
+   f6f359bb 53327d4e 0d9be642a1ce909a 68 05
+   
+   
+   53327d4e f6f359bb 0559318fc8ae3f68 68 0d
+   f6f359bb 53327d4e 0d9be642a1ce90a2 68 0a
+   53327d4e f6f359bb 0559318fc8ae3f69 68 0e
+   ...
+   (data)
+   f6f359bb 53327d4e 0d9be642a1ce909e 64 09 6bf6ca54 /73656e64206d657373616765 (data)
+   f6f359bb 53327d4e 0d9be642a1ce909f 64 09 6bf6ca54 /61616161
