@@ -1,33 +1,23 @@
-# kcp协议
-https://github.com/skywind3000/kcp/issues/137
+# udp2raw-tunnel
+https://github.com/wangyu-/udp2raw-tunnel
 ## 协议格式
 ```
-+-------+-----+------+------+-----+-----+-----+----+-----+------+----------------------------+
-| NONCE | CRC | CONV |  CMD | FRG | WND | TS  | SN | UNA | LEN  |           DATA             |
-+-------+-----+------+------+-----+-----+-----+----+-----+------+----------------------------+
-|  16   | 4   |   4  |   1  |  1  |  2  |  4  |  4 |  4  |  4   |          variable          |
-+-------+-----+------+------+-----+-----+-----+----+-----+------+---+---+---+---+------------+
-|                            SESSION                            |VER|CMD|LEN|SID|   DATA     |
-+---------------------------------------------------------------+---+---+---+---+------------+
-|                             44                                | 1 | 1 | 2 | 4 |  variable  |
-+---------------------------------------------------------------+---+---+---+---+------------+
++----------+----------+------------+---------------+------+-----------+---------------+
+| conv_num |   my_id  | oppsite_id |     n_seq     | type | my_roller |      DATA     | 
++----------+----------+------------+---------------+------+-----------+---------------+
+|     4    |     4    |      4     |       8       |   1  |      1    |   variable    | 
++----------+----------+------------+---------------+------+-----------+---------------+
+
 ```
 ### 说明
-- NONCE：16-bytes cryptographically secure random number, nonce changes for every packet
-- CRC：checksum of data using the IEEE polynomial
+- conv_num：16-bytes cryptographically secure random number, nonce changes for every packet
+- my_id：checksum of data using the IEEE polynomial
    NONCE + CRC = overall crypto header size
-- CONV：random num for each flow
-- CMD：
-    * CMD_PUSH 81：push data
-    * CMD_ACK  82：ack
-    * CMD_WASK 83：window probe (ask)
-    * CMD_WINS 84：window size (tell)
-- FRG：fragment count
-- WND：window size
-- TS：timestamp
-- SN：serial number
-- UNA：un-acknowledged serial number
-- LEN：data length
+- oppsite_id：random num for each flow
+- n_seq：
+- type：fragment count
+- my_roller：window size
+
 - DATA
     * VER：1
     * CMD：
